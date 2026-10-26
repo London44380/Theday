@@ -78,6 +78,13 @@ SECURITY_HEADERS = [
 VERSION_DISCLOSURE_HEADERS = ["Server", "X-Powered-By", "X-AspNet-Version", "X-Generator"]
 
 
+def clean(s) -> str:
+    """Neutralise control characters (ANSI escapes...) from server-controlled
+    data (headers, cookie names, redirect locations...) before it reaches
+    the terminal."""
+    return "".join(c if c.isprintable() else repr(c)[1:-1] for c in str(s))
+
+
 def print_banner():
     print(f"{RED}{BOLD}{BANNER}{RESET}")
     print(f"{RED}{BOLD}            THEDAY{RESET}")
@@ -314,7 +321,7 @@ def run_scan(target: str, timeout: int = 10, download_dir: str = None, resolve_i
     print(f"{BOLD}Findings:{RESET}\n")
     for kind, detail in all_findings:
         color = severity_color(kind)
-        print(f"{color}[{kind.upper()}]{RESET} {detail}")
+        print(f"{color}[{kind.upper()}]{RESET} {clean(detail)}")
 
     print(f"\n{BOLD}Total findings:{RESET} {len(all_findings)}")
     non_failing = {"info", "redirect", "download"}
